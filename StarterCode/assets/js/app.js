@@ -26,12 +26,12 @@ var tPadLeft = 40;
 var svg= d3.select("body")
   .append("svg")
   .attr("width",svgWidth)
-  .attr("height",svgHeight);
+  .attr("height",svgHeight)
+  .attr("class","chart");
 
 //adding chart group ('g')
-
-var chartGroup=svg.append("g")
-.attr("transform", `translate(${margin.left}, ${margin.top})`);
+var chartGroup = svg.append("g")
+.attr("transform", `translate(${margin + tPadLeft}, ${margin - tPadBot})`);
 
 // Section 2:  Import the .csv file.
 // ====================================
@@ -40,14 +40,14 @@ var chartGroup=svg.append("g")
 // Import our CSV data with d3's .csv import method.
 d3.csv("assets/data/data.csv").then(function(data) {
   //casting
-    data.forEach(function(health) {
-    health.poverty= +health.poverty;
-    health.healthcare= +data.healthcare;
+    data.forEach(function(d) {
+     d.poverty = +d.poverty;
+      d.healthcare = +d.healthcare;})
 //visualizing the data
-    console.log(data)
-
-  visualize(data)
-
+    //console.log(health);
+  console.log(data);
+  visualize(data);
+//});
 });
 // Section 3. Create our visualization function
 // ====================================
@@ -76,7 +76,7 @@ chartGroup.append("g")
   // 3.4 Create Circles
   // ==============================
   var circlesGroup = chartGroup.selectAll("circle")
-  .data(data)
+  .data(theData)
   .enter()
   .append("circle")
   .attr("cx", d => xLinearScale(d.poverty))
@@ -91,7 +91,7 @@ chartGroup.append("g")
   .style("font-family", "sans-serif")
   .style("font-size", "8px")
   .selectAll("tspan")
-  .data(data)
+  .data(theData)
   .enter()
   .append("tspan")
   .attr("x", function(data) {
@@ -131,17 +131,14 @@ chartGroup.append("g")
   // ==============================
   chartGroup.append("text")
   .attr("transform", "rotate(-90)")
-  .attr("y", 0 - margin.left - 5)
+  .attr("y", 0 - tPadLeft - 5)
   .attr("x", 0 - (height / 1.30))
   .attr("dy", "1em")
   .attr("class", "axisText")
   .text("Lacks Healthcare (%)");
 
 chartGroup.append("text")
-  .attr("transform", `translate(${width / 2.5}, ${height + margin.top + 30})`)
+  .attr("transform", `translate(${width / 2.5}, ${height + tPadBot + 30})`)
   .attr("class", "axisText")
   .text("In Poverty (%)");
-
-  // 3.7 Code here to add abbrevations to the circles
-  // ===================================================
-}});
+}

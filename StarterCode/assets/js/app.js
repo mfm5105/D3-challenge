@@ -4,7 +4,7 @@
 // ===========================
 // Before we code any data visualizations, we need to at least set up the width, height and margins of the graph.
 var svgWidth=900;
-var svgHeight=500;
+var svgHeight=600;
 // Grab the width of the containing box
 var width = parseInt(d3.select("#scatter").style("width"));
 
@@ -56,22 +56,28 @@ function visualize(theData) {
 
   // 3.1 Create scale functions
   // ==============================
-  var xLinearScale = d3.scaleLinear().range([0, width]);
-  var yLinearScale = d3.scaleLinear().range([height, 0]);
+  var xLinearScale = d3.scaleLinear()
+  .domain([0, d3.max(theData, d => d.poverty)])
+  .range([0, width]);
+
+  var yLinearScale = d3.scaleLinear()
+  .domain([0, d3.max(theData, d => d.healthcare)])
+  .range([0, width]);
 
 
   // 3.2 Create axis functions. Use 6-D3\2\Activities\06-Stu_Complete_Bar_Chart\ for reference.
   // ==============================
   var bottomAxis = d3.axisBottom(xLinearScale);
   var leftAxis = d3.axisLeft(yLinearScale); 
-
+console.log(height)
   // 3.3 Append Axes to the chart
   // ==============================
 chartGroup.append("g")
-  .attr("transform", `translate(0, ${height})`)
+  .attr("transform", `translate(0, ${height+130})`)
   .call(bottomAxis);
 
 chartGroup.append("g")
+  .attr("transform", `translate(${margin},0)`)
   .call(leftAxis);
   // 3.4 Create Circles
   // ==============================
@@ -85,8 +91,8 @@ chartGroup.append("g")
   .attr("fill", "lightblue")
   .attr("opacity", ".5")
   .attr("stroke", "white");    
-
-  chartGroup.append("text")
+console.log(theData)
+  circlesGroup.append("text")
   .style("text-anchor", "middle")
   .style("font-family", "sans-serif")
   .style("font-size", "8px")
@@ -108,16 +114,35 @@ chartGroup.append("g")
   // ===================================================
   // With the circles on our graph, we need matching labels. Let's grab the state abbreviations from our data
   // and place them in the center of our dots.
-
+  chartGroup.selectAll("null")
+  .data(theData)
+  .enter()
+  .append("text")
+  .text(function(x){
+    return x.abbr;
+  })
+  .attr("fill", "black")
+  .attr("text-anchor", "middle")
+  .attr("font-size", "12")
+  .attr("font-style", "bold")
+  .attr("x", d => xScale(d.poverty))
+  .attr("y", d => yScale(d.healthcare));
   // 3.5 Tool tip and tool tip event listeners
   // ==============================
 // initialize tool tip
-    var toolTip = d3.select("body")
-      .append("div")
-      .classed("tooltip",true);
+    var toolTip = d3.tip()
+      .attr("class", "tooltip")
+      .offset([80, -60])
+      .html(function(d) {
+        return (`Poverty : ${d.poverty}<br>healthcare: ${d.healthcare}`);
+      });
+
+    // var toolTip = d3.select("body")
+    //   .append("div")
+    //   .classed("tooltip",true);
 
 // calling tool tip 
-    
+    chartGroup.call(toolTip)
 // Add an onmouseover event to display a tooltip   
   circlesGroup.on("mouseover", function(data) {
         toolTip.show(data, this);
@@ -138,7 +163,7 @@ chartGroup.append("g")
   .text("Lacks Healthcare (%)");
 
 chartGroup.append("text")
-  .attr("transform", `translate(${width / 2.5}, ${height + tPadBot + 30})`)
+  .attr("transform", `translate(${width / 2.5}, ${height + tPadBot + 130})`)
   .attr("class", "axisText")
   .text("In Poverty (%)");
 }
